@@ -27,7 +27,7 @@ public class SftpConfig {
         try {
             JSch jSch = new JSch();
             session = jSch.getSession("user", "192.168.0.13", 22);
-            session.setPassword("sudo");
+            session.setPassword("password");
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();
             channel = session.openChannel("sftp");
