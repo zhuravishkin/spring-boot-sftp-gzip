@@ -19,14 +19,14 @@ import java.util.zip.GZIPInputStream;
 @EnableScheduling
 public class SftpConfig {
     @Scheduled(fixedDelay = 10_000)
-    private void getFileFromSftpServer() {
+    public void getFileFromSftpServer() {
         log.info("Loading file from sftp-server");
         ChannelSftp channelSftp = null;
         Channel channel = null;
         Session session = null;
         try {
             JSch jSch = new JSch();
-            session = jSch.getSession("user", "192.168.0.13", 22);
+            session = jSch.getSession("user", "localhost", 8081);
             session.setPassword("password");
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();
@@ -42,6 +42,7 @@ public class SftpConfig {
                     fileNameList.add(fileName);
                 }
             }
+            System.out.println(fileNameList);
             if (!fileNameList.isEmpty()) {
                 for (String fileName : fileNameList) {
                     try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
