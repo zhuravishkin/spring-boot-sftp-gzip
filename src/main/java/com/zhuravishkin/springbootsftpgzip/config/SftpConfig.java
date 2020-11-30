@@ -42,9 +42,13 @@ public class SftpConfig {
                     fileNameList.add(fileName);
                 }
             }
-            System.out.println(fileNameList);
             if (!fileNameList.isEmpty()) {
                 for (String fileName : fileNameList) {
+                    try {
+                        channelSftp.put(path + "/" + fileName, ChannelSftp.APPEND).close();
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
                     try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
                             new GZIPInputStream(channelSftp.get(path + "/" + fileName))))) {
                         String line;
@@ -52,7 +56,7 @@ public class SftpConfig {
                             System.out.println(line);
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage(), e);
                     }
                 }
             }
