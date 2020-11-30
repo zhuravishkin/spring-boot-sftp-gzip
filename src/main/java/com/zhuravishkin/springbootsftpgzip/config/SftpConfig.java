@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
@@ -34,6 +35,7 @@ public class SftpConfig {
             channel.connect();
             channelSftp = (ChannelSftp) channel;
             List<String> fileNameList = new ArrayList<>();
+            List<String> newFileNameList = new ArrayList<>();
             String path = ".sftp";
             Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(path);
             for (ChannelSftp.LsEntry entry : filelist) {
@@ -44,13 +46,16 @@ public class SftpConfig {
             }
             if (!fileNameList.isEmpty()) {
                 for (String fileName : fileNameList) {
+                    String newFileName = null;
                     try {
-                        channelSftp.put(path + "/" + fileName, ChannelSftp.APPEND).close();
-                    } catch (IOException e) {
+                        newFileName = UUID.randomUUID().toString() + ".gz";
+                        channelSftp.rename(path + "/" + fileName, path + "/" + newFileName);
+                        newFileNameList.add(newFileName);
+                    } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
                     try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                            new GZIPInputStream(channelSftp.get(path + "/" + fileName))))) {
+                            new GZIPInputStream(channelSftp.get(path + "/" + newFileName))))) {
                         String line;
                         while ((line = bufferedReader.readLine()) != null) {
                             System.out.println(line);
@@ -60,8 +65,8 @@ public class SftpConfig {
                     }
                 }
             }
-            if (!fileNameList.isEmpty()) {
-                for (String fileName : fileNameList) {
+            if (!newFileNameList.isEmpty()) {
+                for (String fileName : newFileNameList) {
                     channelSftp.rm(path + "/" + fileName);
                 }
             }
